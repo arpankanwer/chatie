@@ -40,6 +40,36 @@ class DatabaseService {
     return userCollection.where("uid", isEqualTo: uid).snapshots();
   }
 
+  Future<String> getNameFromUid(String uid) async {
+    var name = await userCollection.where("uid", isEqualTo: uid).get();
+
+    return name.docs[0]['fullName'];
+  }
+
+  Future toggleJoinGroup(String uid, String groupId) async {
+    DocumentReference userDocument = userCollection.doc(uid);
+    DocumentReference groupDocument = groupCollection.doc(groupId);
+
+    DocumentSnapshot userSnapshot = await userDocument.get();
+    DocumentSnapshot groupSnapshot = await groupDocument.get();
+
+    if ({groupSnapshot['members']}.toString().contains(uid)) {
+      await userCollection.doc(uid).set({
+        "groups": FieldValue.arrayRemove([groupId])
+      }, SetOptions(merge: true));
+      await groupCollection.doc(groupId).set({
+        "members": FieldValue.arrayRemove([uid])
+      }, SetOptions(merge: true));
+    } else {
+      await userCollection.doc(uid).set({
+        "groups": FieldValue.arrayUnion([groupId])
+      }, SetOptions(merge: true));
+      await groupCollection.doc(groupId).set({
+        "members": FieldValue.arrayUnion([uid])
+      }, SetOptions(merge: true));
+    }
+  }
+
   getMembers(String groupId) async {
     return groupCollection.doc(groupId).snapshots();
   }
@@ -48,9 +78,18 @@ class DatabaseService {
     return userCollection.doc(uid).snapshots();
   }
 
-  Future getGroupsByName(String groupName) async {
-    print((groupCollection.where("groupName", isEqualTo: groupName).get()));
-    return groupCollection.where("groupName", isEqualTo: groupName).get();
+  getGroupsByName(String groupName) async {
+    // if (groupName != "") {
+    return groupCollection
+        .where("groupName", isGreaterThanOrEqualTo: groupName)
+        .where("groupName",
+            isLessThan: groupName.substring(0, groupName.length - 1) +
+                String.fromCharCode(
+                    groupName.codeUnitAt(groupName.length - 1) + 1))
+        .snapshots();
+    // print(snapshot);
+    // return snapshot;
+    // }
   }
 
   Future createGroup(String uid, String userName, String groupName) async {
