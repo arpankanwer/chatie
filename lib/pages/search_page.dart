@@ -5,6 +5,7 @@ import 'package:fluttertest/services/database_service.dart';
 import 'package:fluttertest/widgets/widgets.dart';
 
 import 'package:async/async.dart';
+
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
 
@@ -77,20 +78,19 @@ class _SearchPageState extends State<SearchPage> {
       });
       await DatabaseService().getGroupsByName(groupName.text).then((value) {
         setState(() {
+          isLoading = false;
           // print(value);
           groups = value;
-          isLoading = false;
         });
       });
     }
   }
 
-
   groupList() {
     // return groups?.docs.length != null
     //     ? groups!.docs.isNotEmpty
     // ?
-    print("built");
+
     if (groupName.text.isNotEmpty) {
       return StreamBuilder(
           stream: groups,
@@ -116,7 +116,15 @@ class _SearchPageState extends State<SearchPage> {
                               snapshot.data.docs[index]['members']
                             }.toString().contains(
                                 FirebaseAuth.instance.currentUser!.uid);
-                            print(isJoinedAlready);
+
+                            // print("built" + index.toString());
+                            // print(snapshot.data.docs.length);
+                            // print(isJoinedAlready);
+                            // print(snapshot.data.docs[index]['members']);
+                            // print(FirebaseAuth.instance.currentUser!.uid);
+                            // setState(() {
+
+                            // });
                             return ListTile(
                                 leading: CircleAvatar(
                                   radius: 30,
@@ -167,15 +175,18 @@ class _SearchPageState extends State<SearchPage> {
                                         .then((value) {
                                       // print(isJoinedAlready.toString() +
                                       //     "this user");
-                                      if (isJoinedAlready!) {
+                                      if (!{snapshot.data.docs[index]['members']}
+                                          .toString()
+                                          .contains(FirebaseAuth
+                                              .instance.currentUser!.uid)) {
                                         // setState(() {
-                                        //   isJoinedAlready = !isJoinedAlready!;
+                                        isJoinedAlready = !isJoinedAlready!;
                                         // });
                                         showSnackbar(context, Colors.green,
                                             "You Joined ${snapshot.data.docs[index]['groupName']}");
                                       } else {
                                         // setState(() {
-                                        //   isJoinedAlready = !isJoinedAlready!;
+                                        isJoinedAlready = !isJoinedAlready!;
                                         // });
                                         showSnackbar(context, Colors.red,
                                             "You Left ${snapshot.data.docs[index]['groupName']}");
