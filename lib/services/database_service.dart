@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DatabaseService {
   // FirebaseAdmin admin = FirebaseAdmin();
@@ -109,6 +110,23 @@ class DatabaseService {
 
     await userCollection.doc(uid).set({
       "groups": FieldValue.arrayUnion([groupDocumentReference.id])
+    }, SetOptions(merge: true));
+  }
+
+  getMessages(String groupId) async {
+    return groupCollection
+        .doc(groupId)
+        .collection('messages')
+        .orderBy('time')
+        .snapshots();
+  }
+
+  Future sendMessage(String groupId, Map<String, dynamic> message) async {
+    await groupCollection.doc(groupId).collection('messages').add(message);
+    await groupCollection.doc(groupId).set({
+      "recentMessage": message['message'],
+      "recentMessageSender": message['sender'],
+      "recentMessageTime": message['time'].toString()
     }, SetOptions(merge: true));
   }
 }

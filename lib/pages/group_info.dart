@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertest/pages/home_page.dart';
 import 'package:fluttertest/services/database_service.dart';
+import 'package:fluttertest/widgets/widgets.dart';
 
 class GroupInfo extends StatefulWidget {
   final String username;
@@ -39,8 +42,15 @@ class _GroupInfoState extends State<GroupInfo> {
           Padding(
             padding: const EdgeInsets.all(10.0),
             child: IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {},
+              icon: const Icon(Icons.login_outlined),
+              onPressed: () {
+                DatabaseService()
+                    .toggleJoinGroup(
+                        FirebaseAuth.instance.currentUser!.uid, widget.groupId)
+                    .whenComplete(() {
+                  nextScreenReplace(context, const HomePage());
+                });
+              },
             ),
           )
         ],
