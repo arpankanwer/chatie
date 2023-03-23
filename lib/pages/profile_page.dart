@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertest/auth/login_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertest/auth/login_screen.dart';
+import 'package:fluttertest/controller/auth_controller.dart';
 import 'package:fluttertest/pages/home_page.dart';
-import 'package:fluttertest/services/auth_service.dart';
-import 'package:fluttertest/widgets/widgets.dart';
 
-class ProfilePage extends StatelessWidget {
-  String userName;
-  String email;
-  ProfilePage(this.userName, this.email, {super.key});
+class ProfilePage extends ConsumerWidget {
+  static const routeName = '/profile-screen';
 
-  AuthService authService = AuthService();
+  const ProfilePage({super.key});
+
+  // String userName;
+  // String email;
+  // ProfilePage(this.userName, this.email, {super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Profile"),
@@ -31,16 +33,16 @@ class ProfilePage extends StatelessWidget {
                 size: 150,
               ),
               const SizedBox(height: 15),
-              Text(
-                userName,
-                textAlign: TextAlign.center,
-              ),
+              // Text(
+              //   userName,
+              //   textAlign: TextAlign.center,
+              // ),
               const SizedBox(height: 2),
-              Text(
-                email,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 15),
+              // Text(
+              //   email,
+              //   textAlign: TextAlign.center,
+              // ),
+              // const SizedBox(height: 15),
               const Divider(
                 height: 2,
               ),
@@ -51,17 +53,13 @@ class ProfilePage extends StatelessWidget {
                 title: const Text("Profile"),
               ),
               ListTile(
-                onTap: () {
-                  nextScreenReplace(context, const HomePage());
-                },
+                onTap: () =>
+                    Navigator.pushReplacementNamed(context, HomePage.routeName),
                 leading: const Icon(Icons.group),
                 title: const Text("Groups"),
               ),
               ListTile(
-                onTap: () async {
-                  authService.signOut().whenComplete(
-                      () => nextScreenReplace(context, const LoginPage()));
-                },
+                onTap: () => ref.read(authControllerProvider).signOut(context),
                 leading: const Icon(Icons.logout),
                 title: const Text("Logout"),
               ),

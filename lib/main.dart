@@ -3,13 +3,17 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:fluttertest/helper/helper_function.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertest/controller/auth_controller.dart';
 import 'package:fluttertest/pages/home_page.dart';
 import 'package:fluttertest/shared/constants.dart';
+import 'package:fluttertest/widgets/router.dart';
 
-import 'auth/login_page.dart';
+import 'auth/login_screen.dart';
+import 'commom/error.dart';
+import 'commom/loader.dart';
 
-Future<void> main() async {
+main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (kIsWeb || Platform.isWindows || Platform.isLinux) {
@@ -23,41 +27,37 @@ Future<void> main() async {
     await Firebase.initializeApp(); // android and ios
   }
 
-  runApp(const MyApp());
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  bool isLoggedIn = false;
-
-  @override
-  void initState() {
-    super.initState();
-    getUserLoggedInStatus();
-  }
-
-  getUserLoggedInStatus() async {
-    await HelperFunctions.getUserLoggedInStatus().then((value) {
-      if (value != null) {
-        setState(() {
-          isLoggedIn = value;
-        });
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
+      title: "Chat App",
       theme: ThemeData(brightness: Brightness.light),
       debugShowCheckedModeBanner: false,
-      home: isLoggedIn ? const HomePage() : const LoginPage(),
+      onGenerateRoute: (settings) => generateRoute(settings),
+      home: ref.watch(userDataProvider).when(
+            data: (user) {
+              if (user == null) {
+                return const LoginPage();
+              }
+              return const HomePage();
+            },
+            error: (err, trace) {
+              return ErrorScreen(
+                error: err.toString(),
+              );
+            },
+            loading: () => const Loader(),
+          ),
     );
   }
 }

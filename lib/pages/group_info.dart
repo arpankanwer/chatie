@@ -1,10 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertest/pages/home_page.dart';
-import 'package:fluttertest/services/database_service.dart';
+import 'package:fluttertest/repository/database_service.dart';
 import 'package:fluttertest/widgets/widgets.dart';
 
 class GroupInfo extends StatefulWidget {
+  static const routeName = '/group-info';
   final String username;
   final String groupId;
   final String groupName;
@@ -48,7 +49,7 @@ class _GroupInfoState extends State<GroupInfo> {
                     .toggleJoinGroup(
                         FirebaseAuth.instance.currentUser!.uid, widget.groupId)
                     .whenComplete(() {
-                  nextScreenReplace(context, const HomePage());
+                  Navigator.pushReplacementNamed(context, HomePage.routeName);
                 });
               },
             ),

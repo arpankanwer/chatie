@@ -1,69 +1,48 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertest/auth/login_page.dart';
-import 'package:fluttertest/helper/helper_function.dart';
-import 'package:fluttertest/pages/profile_page.dart';
-import 'package:fluttertest/pages/search_page.dart';
-import 'package:fluttertest/services/auth_service.dart';
-import 'package:fluttertest/services/database_service.dart';
-import 'package:fluttertest/widgets/group_tile.dart';
-import 'package:fluttertest/widgets/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertest/group/controller/group_controller.dart';
+import 'package:fluttertest/group/repository.dart/group_repository.dart';
+import 'package:fluttertest/models/group_model.dart';
 
-class HomePage extends StatefulWidget {
+import '../commom/loader.dart';
+import '/controller/auth_controller.dart';
+import '/models/user_model.dart';
+import '/pages/profile_page.dart';
+import '/widgets/group_tile.dart';
+
+import 'search_page.dart';
+
+class HomePage extends ConsumerStatefulWidget {
+  static const routeName = '/home-page';
+
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  AuthService authService = AuthService();
-  DatabaseService databaseService = DatabaseService();
-  String userName = "";
-  String email = "";
-  Stream? groups;
-  bool isLoading = false;
+class _HomePageState extends ConsumerState<HomePage> {
+  UserModel? user;
   TextEditingController groupName = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    gettingUserData();
-  }
-
-  gettingUserData() async {
-    await HelperFunctions.getUserName().then((value) {
-      setState(() {
-        userName = value!;
-      });
-    });
-    await HelperFunctions.getEmail().then((value) {
-      setState(() {
-        email = value!;
-      });
-    });
-    await databaseService
-        .getGroups(FirebaseAuth.instance.currentUser!.uid)
-        .then((snapshot) {
-      setState(() {
-        groups = snapshot;
-      });
-    });
+    ref.read(userDataProvider).whenData((value) => user = value);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Messages"),
+        title: Text("Welcome, ${user!.username}"),
         centerTitle: true,
         actions: [
           Padding(
               padding: const EdgeInsets.all(10),
               child: IconButton(
-                  onPressed: () {
-                    nextScreen(context, const SearchPage());
-                  },
+                  onPressed: () =>
+                      Navigator.pushNamed(context, SearchPage.routeName),
                   icon: const Icon(Icons.search)))
         ],
       ),
@@ -81,12 +60,12 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 15),
               Text(
-                "@$userName",
+                "@${user!.username}",
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 2),
               Text(
-                email,
+                user!.email,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 15),
@@ -94,9 +73,8 @@ class _HomePageState extends State<HomePage> {
                 height: 2,
               ),
               ListTile(
-                onTap: () {
-                  nextScreenReplace(context, ProfilePage(userName, email));
-                },
+                onTap: () => Navigator.pushReplacementNamed(
+                    context, ProfilePage.routeName),
                 leading: const Icon(Icons.account_circle_outlined),
                 title: const Text("Profile"),
               ),
@@ -107,10 +85,7 @@ class _HomePageState extends State<HomePage> {
                 selected: true,
               ),
               ListTile(
-                onTap: () async {
-                  authService.signOut().whenComplete(
-                      () => nextScreenReplace(context, const LoginPage()));
-                },
+                onTap: () => ref.read(authControllerProvider).signOut(context),
                 leading: const Icon(Icons.logout),
                 title: const Text("Logout"),
               ),
@@ -118,11 +93,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       )),
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : groupList(),
+      body: groupList(),
       floatingActionButton: FloatingActionButton(
           onPressed: () {
             addGroup(context);
@@ -132,51 +103,35 @@ class _HomePageState extends State<HomePage> {
   }
 
   groupList() {
-    return StreamBuilder(
-        stream: groups,
-        builder: (context, AsyncSnapshot snapshot) {
-          if (snapshot.hasData) {
-            if (snapshot.data['groups'] != null) {
-              if (snapshot.data['groups'].length != 0) {
-                return ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: snapshot.data['groups'].length,
-                    itemBuilder: (content, index) {
-                      int reverseIndex =
-                          snapshot.data['groups'].length - index - 1;
-                      return StreamBuilder(
-                          stream: databaseService.getGroupNameFromId(
-                              snapshot.data['groups'][reverseIndex]),
-                          builder: (context, AsyncSnapshot nameSnapshot) {
-                            if (nameSnapshot.hasData) {
-                              isLoading = false;
-                              return ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: nameSnapshot.data.docs.length,
-                                  itemBuilder: (context, index1) {
-                                    return GroupTile(
-                                        groupId: snapshot.data['groups']
-                                            [reverseIndex],
-                                        groupName: nameSnapshot
-                                            .data.docs[index1]['groupName'],
-                                        username: snapshot.data['username'],
-                                        fullName: snapshot.data['fullName']);
-                                  });
-                            }
-
-                            isLoading = true;
-                            return Container();
-                          });
-                    });
-              }
-              return noGroupList();
-            }
-            return noGroupList();
+    return StreamBuilder<UserModel>(
+        stream: ref.watch(groupControllerProvider).getGroups(),
+        builder: (context, AsyncSnapshot<UserModel> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Loader();
           }
-          return Center(
-            child: CircularProgressIndicator(
-                color: Theme.of(context).primaryColor),
-          );
+          return snapshot.data!.groups.isNotEmpty
+              ? ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: snapshot.data!.groups.length,
+                  itemBuilder: (content, index) {
+                    int reverseIndex = snapshot.data!.groups.length - index - 1;
+                    return StreamBuilder<GroupModel>(
+                        stream: ref
+                            .watch(groupControllerProvider)
+                            .getGroupsName(snapshot.data!.groups[reverseIndex]),
+                        builder:
+                            (context, AsyncSnapshot<GroupModel> nameSnapshot) {
+                          if (nameSnapshot.data != null) {
+                            return GroupTile(
+                                groupId: snapshot.data!.groups[reverseIndex],
+                                groupName: nameSnapshot.data!.groupName,
+                                username: snapshot.data!.username,
+                                fullName: snapshot.data!.fullName);
+                          }
+                          return Container();
+                        });
+                  })
+              : noGroupList();
         });
   }
 
@@ -188,7 +143,6 @@ class _HomePageState extends State<HomePage> {
 
   addGroup(BuildContext context) {
     showDialog(
-        // barrierDismissible: false,
         context: context,
         builder: (context) {
           return AlertDialog(
@@ -199,9 +153,7 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   TextFormField(
                     onChanged: (value) {
-                      setState(() {
-                        groupName.text = value;
-                      });
+                      groupName.text = value;
                     },
                   )
                 ],
@@ -215,16 +167,11 @@ class _HomePageState extends State<HomePage> {
                 child: const Text("Cancel"),
               ),
               ElevatedButton(
-                onPressed: () async {
+                onPressed: () {
                   if (groupName.text != "") {
-                    databaseService.createGroup(
-                        FirebaseAuth.instance.currentUser!.uid,
-                        userName,
-                        groupName.text);
-
-                    Navigator.of(context).pop();
-                    showSnackbar(
-                        context, Colors.green, "Group created successfully.");
+                    ref
+                        .read(groupControllerProvider)
+                        .createGroup(context, groupName.text);
                   }
                 },
                 child: const Text("Create"),

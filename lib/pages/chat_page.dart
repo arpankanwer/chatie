@@ -1,13 +1,13 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertest/pages/group_info.dart';
-import 'package:fluttertest/services/database_service.dart';
-import 'package:fluttertest/widgets/widgets.dart';
+import 'package:fluttertest/repository/database_service.dart';
 
 import '../widgets/message_tile.dart';
 
-class ChatPage extends StatefulWidget {
+class ChatPage extends ConsumerStatefulWidget {
+  static const routeName = '/chat-screen';
+
   final String username;
   final String groupId;
   final String groupName;
@@ -21,26 +21,26 @@ class ChatPage extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<ChatPage> createState() => _ChatPageState();
+  ConsumerState<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _ChatPageState extends ConsumerState<ChatPage> {
   Stream? chats;
   TextEditingController messageController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    initMessages();
+    // initMessages();
   }
 
-  initMessages() {
-    DatabaseService().getMessages(widget.groupId).then((val) {
-      setState(() {
-        chats = val;
-      });
-    });
-  }
+  // initMessages() {
+  //   DatabaseService().getMessages(widget.groupId).then((val) {
+  //     setState(() {
+  //       chats = val;
+  //     });
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -51,15 +51,15 @@ class _ChatPageState extends State<ChatPage> {
         title: Text(widget.groupName),
         actions: [
           GestureDetector(
-            onTap: () {
-              nextScreen(
-                  context,
-                  GroupInfo(
-                      groupId: widget.groupId,
-                      groupName: widget.groupName,
-                      fullName: widget.fullName,
-                      username: widget.username));
-            },
+            onTap: () => Navigator.pushNamed(context, GroupInfo.routeName),
+            // nextScreen(
+            //     context,
+            //     GroupInfo(
+            //         groupId: widget.groupId,
+            //         groupName: widget.groupName,
+            //         fullName: widget.fullName,
+            //         username: widget.username));
+
             child: const Padding(
               padding: EdgeInsets.all(10.0),
               child: Icon(Icons.info),
@@ -107,7 +107,7 @@ class _ChatPageState extends State<ChatPage> {
 
   sendMessage() {
     if (messageController.text.isNotEmpty) {
-      print(widget.username);
+      // print(widget.username);
       Map<String, dynamic> message = {
         "message": messageController.text,
         "sender": widget.username,

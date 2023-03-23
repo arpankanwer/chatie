@@ -1,20 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertest/services/database_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertest/group/controller/group_controller.dart';
+import 'package:fluttertest/repository/database_service.dart';
 import 'package:fluttertest/widgets/widgets.dart';
 
-import 'package:async/async.dart';
+class SearchPage extends ConsumerStatefulWidget {
+  static const routeName = '/search-screen';
 
-class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
 
   @override
-  State<SearchPage> createState() => _SearchPageState();
+  ConsumerState<SearchPage> createState() => _SearchPageState();
 }
 
-class _SearchPageState extends State<SearchPage> {
-  bool isLoading = false;
+class _SearchPageState extends ConsumerState<SearchPage> {
   bool userSearched = false;
   TextEditingController groupName = TextEditingController();
   Stream? groups;
@@ -37,33 +38,38 @@ class _SearchPageState extends State<SearchPage> {
                 Expanded(
                   child: TextField(
                     onChanged: (value) {
-                      userSearched = true;
                       if (value.isNotEmpty) {
-                        groupName.text = value;
-                        getGroups();
+                        setState(() {
+                          groupName.text = value;
+                          userSearched = true;
+                        });
+                        groups = ref
+                            .watch(groupControllerProvider)
+                            .getGroupsByName(groupName.text);
+                      } else {
+                        setState(() {
+                          userSearched = false;
+                        });
                       }
                     },
-                    // controller: groupName,
                     decoration: const InputDecoration(
                       hintText: "Search Groups",
                       border: InputBorder.none,
+                      hintStyle: TextStyle(color: Colors.white),
                     ),
                     style: const TextStyle(color: Colors.white),
                   ),
                 ),
-                IconButton(onPressed: () {}, icon: const Icon(Icons.search))
+                const Icon(
+                  Icons.search,
+                  color: Colors.white,
+                )
               ],
             ),
           ),
           Container(
             padding: const EdgeInsets.all(10),
-            child: isLoading
-                ? Center(
-                    child: CircularProgressIndicator(
-                      color: Theme.of(context).primaryColor,
-                    ),
-                  )
-                : groupList(),
+            child: groupList(),
           ),
           if (!userSearched) const Text("Enter Group Name to Search !"),
         ],
@@ -71,34 +77,14 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  getGroups() async {
-    if (groupName.text.isNotEmpty) {
-      setState(() {
-        isLoading = true;
-      });
-      await DatabaseService().getGroupsByName(groupName.text).then((value) {
-        setState(() {
-          isLoading = false;
-          // print(value);
-          groups = value;
-        });
-      });
-    }
-  }
-
   groupList() {
-    // return groups?.docs.length != null
-    //     ? groups!.docs.isNotEmpty
-    // ?
-
     if (groupName.text.isNotEmpty) {
       return StreamBuilder(
           stream: groups,
           builder: (context, AsyncSnapshot snapshot) {
+            ;
             if (snapshot.hasData) {
               if (snapshot.data.docs != null) {
-                // print("${(snapshot.data.docs[0]['members'].toString())}print");
-
                 return ListView.builder(
                   shrinkWrap: true,
                   itemCount: snapshot.data.docs.length,
@@ -111,20 +97,11 @@ class _SearchPageState extends State<SearchPage> {
                           //     .toString() +
                           // isJoinedAlready.toString());
                           if (nameSnapshot.hasData) {
-                            isLoading = false;
                             isJoinedAlready = {
                               snapshot.data.docs[index]['members']
                             }.toString().contains(
                                 FirebaseAuth.instance.currentUser!.uid);
 
-                            // print("built" + index.toString());
-                            // print(snapshot.data.docs.length);
-                            // print(isJoinedAlready);
-                            // print(snapshot.data.docs[index]['members']);
-                            // print(FirebaseAuth.instance.currentUser!.uid);
-                            // setState(() {
-
-                            // });
                             return ListTile(
                                 leading: CircleAvatar(
                                   radius: 30,
@@ -168,27 +145,25 @@ class _SearchPageState extends State<SearchPage> {
                                   onPressed: () async {
                                     await DatabaseService()
                                         .toggleJoinGroup(
-                                            FirebaseAuth
-                                                .instance.currentUser!.uid,
                                             snapshot.data.docs[index]
                                                 ['groupId'])
                                         .then((value) {
                                       // print(isJoinedAlready.toString() +
                                       //     "this user");
-                                      if (!{snapshot.data.docs[index]['members']}
-                                          .toString()
-                                          .contains(FirebaseAuth
-                                              .instance.currentUser!.uid)) {
+                                      if (!{
+                                        snapshot.data.docs[index]['members']
+                                      }.toString().contains(FirebaseAuth
+                                          .instance.currentUser!.uid)) {
                                         // setState(() {
                                         isJoinedAlready = !isJoinedAlready!;
                                         // });
-                                        showSnackbar(context, Colors.green,
+                                        showSnackBar(context, Colors.green,
                                             "You Joined ${snapshot.data.docs[index]['groupName']}");
                                       } else {
                                         // setState(() {
                                         isJoinedAlready = !isJoinedAlready!;
                                         // });
-                                        showSnackbar(context, Colors.red,
+                                        showSnackBar(context, Colors.red,
                                             "You Left ${snapshot.data.docs[index]['groupName']}");
                                       }
                                     });
@@ -198,7 +173,7 @@ class _SearchPageState extends State<SearchPage> {
                                       : const Text("Join"),
                                 ));
                           }
-                          isLoading = true;
+                          // isLoading = true;
                           return Container();
                         });
                   },
