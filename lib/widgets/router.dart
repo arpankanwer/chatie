@@ -29,14 +29,23 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
         builder: (context) => const SearchPage(),
       );
-    // case ChatPage.routeName:
-    //   return MaterialPageRoute(
-    //     builder: (context) => const ChatPage(),
-    //   );
-    // case GroupInfo.routeName:
-    //   return MaterialPageRoute(
-    //     builder: (context) => GroupInfo(),
-    //   );
+    case ChatPage.routeName:
+      final arguments = settings.arguments as Map<String, dynamic>;
+      return MaterialPageRoute(
+        builder: (context) => ChatPage(
+          groupId: arguments['groupId']!,
+          groupName: arguments['groupName']!,
+        ),
+      );
+    case GroupInfo.routeName:
+      final arguments = settings.arguments as Map<String, dynamic>;
+
+      return MaterialPageRoute(
+        builder: (context) => GroupInfo(
+          groupId: arguments['groupId']!,
+          groupName: arguments['groupName']!,
+        ),
+      );
     default:
       return MaterialPageRoute(
         builder: (context) => const Scaffold(

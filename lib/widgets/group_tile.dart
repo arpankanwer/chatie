@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertest/pages/chat_page.dart';
-import 'package:fluttertest/widgets/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../pages/chat_page.dart';
 
-class GroupTile extends StatefulWidget {
+class GroupTile extends ConsumerStatefulWidget {
   final String username;
   final String groupId;
   final String groupName;
@@ -16,23 +16,17 @@ class GroupTile extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<GroupTile> createState() => _GroupTileState();
+  ConsumerState<GroupTile> createState() => _GroupTileState();
 }
 
-class _GroupTileState extends State<GroupTile> {
+class _GroupTileState extends ConsumerState<GroupTile> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, ChatPage.routeName)
-      // nextScreen(
-      //     context,
-      //     ChatPage(
-      //       groupId: widget.groupId,
-      //       groupName: widget.groupName,
-      //       username: widget.username,
-      //       fullName: widget.fullName,
-      //     ));
-      ,
+      onTap: () => Navigator.pushNamed(context, ChatPage.routeName, arguments: {
+        'groupId': widget.groupId,
+        'groupName': widget.groupName,
+      }),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
         child: ListTile(

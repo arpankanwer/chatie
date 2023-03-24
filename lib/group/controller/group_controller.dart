@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertest/models/chat_model.dart';
 import 'package:fluttertest/models/user_model.dart';
 
 import '../../models/group_model.dart';
@@ -26,8 +27,23 @@ class GroupController {
     return groupRepository.getGroupsName(groupId);
   }
 
-Stream getGroupsByName(String groupId) {
+  Stream getGroupsByName(String groupId) {
     return groupRepository.getGroupsByName(groupId);
   }
 
+  Future sendMessage(String groupId, Map<String, dynamic> message) {
+    return groupRepository.sendMessage(groupId, message);
+  }
+
+  Stream<List<ChatModel>> getMessages(String groupId) {
+    return groupRepository.getMessages(groupId);
+  }
+
+  Future toggleJoinGroup(String groupId) {
+    return groupRepository.toggleJoinGroup(groupId);
+  }
+
+  Stream<UserModel> getUserDataFromId(String userId) {
+    return groupRepository.getUserDataFromId(userId);
+  }
 }

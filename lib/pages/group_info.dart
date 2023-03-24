@@ -1,36 +1,35 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertest/pages/home_page.dart';
-import 'package:fluttertest/repository/database_service.dart';
-import 'package:fluttertest/widgets/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertest/controller/auth_controller.dart';
+import 'package:fluttertest/group/controller/group_controller.dart';
+import 'package:fluttertest/models/group_model.dart';
+import 'package:fluttertest/models/user_model.dart';
+import '../commom/loader.dart';
+import 'home_page.dart';
 
-class GroupInfo extends StatefulWidget {
+class GroupInfo extends ConsumerStatefulWidget {
   static const routeName = '/group-info';
-  final String username;
   final String groupId;
   final String groupName;
-  final String fullName;
-  const GroupInfo(
-      {Key? key,
-      required this.groupId,
-      required this.groupName,
-      required this.fullName,
-      required this.username})
-      : super(key: key);
+  const GroupInfo({
+    Key? key,
+    required this.groupId,
+    required this.groupName,
+  }) : super(key: key);
 
   @override
-  State<GroupInfo> createState() => _GroupInfoState();
+  ConsumerState<GroupInfo> createState() => _GroupInfoState();
 }
 
-class _GroupInfoState extends State<GroupInfo> {
-  Stream? members;
-  bool isLoading = false;
+class _GroupInfoState extends ConsumerState<GroupInfo> {
+  UserModel? user;
 
   @override
   void initState() {
     super.initState();
 
-    getMembers();
+    ref.read(userDataProvider).whenData((value) => user = value);
   }
 
   @override
@@ -45,9 +44,9 @@ class _GroupInfoState extends State<GroupInfo> {
             child: IconButton(
               icon: const Icon(Icons.login_outlined),
               onPressed: () {
-                DatabaseService()
-                    .toggleJoinGroup(
-                        FirebaseAuth.instance.currentUser!.uid, widget.groupId)
+                ref
+                    .read(groupControllerProvider)
+                    .toggleJoinGroup(widget.groupId)
                     .whenComplete(() {
                   Navigator.pushReplacementNamed(context, HomePage.routeName);
                 });
@@ -76,84 +75,71 @@ class _GroupInfoState extends State<GroupInfo> {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               subtitle: Text(
-                "Admin: ${widget.fullName}",
+                "Admin: ${user?.fullName}",
                 style: const TextStyle(fontSize: 13),
               ),
             ),
           ),
-          isLoading
-              ? Center(
-                  child: CircularProgressIndicator(
-                      color: Theme.of(context).primaryColor),
-                )
-              : membersList(),
+          membersList(),
         ],
       ),
     );
   }
 
   membersList() {
-    return StreamBuilder(
-      stream: members,
-      builder: (context, AsyncSnapshot snapshot) {
+    return StreamBuilder<GroupModel>(
+      stream: ref.watch(groupControllerProvider).getGroupsName(widget.groupId),
+      builder: (context, AsyncSnapshot<GroupModel> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Loader();
+        }
         if (snapshot.hasData) {
-          if (snapshot.data['members'] != null) {
-            if (snapshot.data['members'].length != 0) {
-              return ListView.builder(
-                shrinkWrap: true,
-                itemCount: snapshot.data['members'].length,
-                itemBuilder: (context, index) {
-                  return StreamBuilder(
-                      stream: DatabaseService()
-                          .getNameFromId(snapshot.data['members'][index]),
-                      builder: (context, AsyncSnapshot nameSnapshot) {
-                        if (nameSnapshot.hasData) {
-                          isLoading = false;
-                          return ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: nameSnapshot.data.docs.length,
-                              itemBuilder: (context, nameIndex) {
-                                return Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 5),
-                                  child: ListTile(
-                                    leading: CircleAvatar(
-                                      radius: 30,
-                                      backgroundColor:
-                                          Theme.of(context).primaryColor,
-                                      child: Text(
-                                        nameSnapshot
-                                            .data.docs[nameIndex]['fullName']
-                                            .substring(0, 1)
-                                            .toUpperCase(),
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w500),
-                                      ),
-                                    ),
-                                    title: Text(
-                                      nameSnapshot.data.docs[nameIndex]
-                                          ['fullName'],
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    subtitle: Text(
-                                      "@${nameSnapshot.data.docs[nameIndex]['username']}",
-                                      style: const TextStyle(fontSize: 13),
-                                    ),
-                                  ),
-                                );
-                              });
-                        }
+          if (snapshot.data!.members.isNotEmpty) {
+            return ListView.builder(
+              shrinkWrap: true,
+              itemCount: snapshot.data?.members.length,
+              itemBuilder: (context, index) {
+                return StreamBuilder<UserModel>(
+                    stream: ref
+                        .watch(groupControllerProvider)
+                        .getUserDataFromId(snapshot.data!.members[index]),
+                    builder: (context, AsyncSnapshot<UserModel> nameSnapshot) {
+                      print(nameSnapshot.data?.fullName);
+                      if (nameSnapshot.data.toString() != "null") {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 5),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              radius: 30,
+                              backgroundColor: Theme.of(context).primaryColor,
+                              child: Text(
+                                nameSnapshot.data!.fullName
+                                    .substring(0, 1)
+                                    .toUpperCase(),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                            title: Text(
+                              nameSnapshot.data!.fullName,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(
+                              "@${nameSnapshot.data!.username}",
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ),
+                        );
+                      }
 
-                        isLoading = true;
-                        return Container();
-                      });
-                },
-              );
-            }
-            return noMemberList();
+                      return Container();
+                    });
+              },
+            );
           }
           return noMemberList();
         }
@@ -169,13 +155,5 @@ class _GroupInfoState extends State<GroupInfo> {
     return const Center(
       child: Text("No Members"),
     );
-  }
-
-  getMembers() async {
-    DatabaseService().getMembers(widget.groupId).then((value) {
-      setState(() {
-        members = value;
-      });
-    });
   }
 }

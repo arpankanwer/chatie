@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertest/models/chat_model.dart';
 import 'package:fluttertest/models/group_model.dart';
 import 'package:fluttertest/models/user_model.dart';
 
@@ -80,6 +81,47 @@ class GroupRepository {
     });
   }
 
+  Stream<List<ChatModel>> getMessages(String groupId) {
+    return firebaseFirestore
+        .collection('groups')
+        .doc(groupId)
+        .collection('messages')
+        .orderBy('time')
+        .snapshots()
+        .map((event) {
+      List<ChatModel> chats = [];
+      for (var i = 0; i < event.docs.length; i++) {
+        ChatModel chat = ChatModel.fromMap(event.docs[i].data());
+        chats.add(chat);
+      }
+      return chats;
+    });
+  }
+
+  Future sendMessage(String groupId, Map<String, dynamic> message) async {
+    await firebaseFirestore
+        .collection('groups')
+        .doc(groupId)
+        .collection('messages')
+        .add(message);
+    await firebaseFirestore.collection('groups').doc(groupId).set({
+      "recentMessage": message['message'],
+      "recentMessageSender": message['sender'],
+      "recentMessageTime": message['time'].toString()
+    }, SetOptions(merge: true));
+  }
+
+  Stream<UserModel> getUserDataFromId(String uid) {
+    return firebaseFirestore
+        .collection('users')
+        .doc(uid)
+        .snapshots()
+        .map((event) {
+      UserModel user = UserModel.fromMap(event.data()!);
+      return user;
+    });
+  }
+
   Future<String> getNameFromUid(String uid) async {
     var name = await firebaseFirestore
         .collection('users')
@@ -97,21 +139,20 @@ class GroupRepository {
     DocumentReference groupDocument =
         firebaseFirestore.collection('groups').doc(groupId);
 
-    // DocumentSnapshot userSnapshot = await userDocument.get();
     DocumentSnapshot groupSnapshot = await groupDocument.get();
 
     if ({groupSnapshot['members']}.toString().contains(uid.toString())) {
-      await firebaseFirestore.collection('users').doc(uid).set({
+      await userDocument.set({
         "groups": FieldValue.arrayRemove([groupId])
       }, SetOptions(merge: true));
-      await firebaseFirestore.collection('groups').doc(groupId).set({
+      await groupDocument.set({
         "members": FieldValue.arrayRemove([uid])
       }, SetOptions(merge: true));
     } else {
-      await firebaseFirestore.collection('users').doc(uid).set({
+      await userDocument.set({
         "groups": FieldValue.arrayUnion([groupId])
       }, SetOptions(merge: true));
-      await firebaseFirestore.collection('groups').doc(groupId).set({
+      await groupDocument.set({
         "members": FieldValue.arrayUnion([uid])
       }, SetOptions(merge: true));
     }

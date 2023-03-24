@@ -143,30 +143,30 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                                   Theme.of(context)
                                                       .primaryColor)),
                                   onPressed: () async {
-                                    await DatabaseService()
-                                        .toggleJoinGroup(
-                                            snapshot.data.docs[index]
-                                                ['groupId'])
-                                        .then((value) {
-                                      // print(isJoinedAlready.toString() +
-                                      //     "this user");
-                                      if (!{
-                                        snapshot.data.docs[index]['members']
-                                      }.toString().contains(FirebaseAuth
-                                          .instance.currentUser!.uid)) {
-                                        // setState(() {
-                                        isJoinedAlready = !isJoinedAlready!;
-                                        // });
-                                        showSnackBar(context, Colors.green,
-                                            "You Joined ${snapshot.data.docs[index]['groupName']}");
-                                      } else {
-                                        // setState(() {
-                                        isJoinedAlready = !isJoinedAlready!;
-                                        // });
-                                        showSnackBar(context, Colors.red,
-                                            "You Left ${snapshot.data.docs[index]['groupName']}");
-                                      }
-                                    });
+                                    // await DatabaseService()
+                                    //     .toggleJoinGroup(
+                                    //         snapshot.data.docs[index]
+                                    //             ['groupId'])
+                                    //     .then((value) {
+                                    //   // print(isJoinedAlready.toString() +
+                                    //   //     "this user");
+                                    //   if (!{
+                                    //     snapshot.data.docs[index]['members']
+                                    //   }.toString().contains(FirebaseAuth
+                                    //       .instance.currentUser!.uid)) {
+                                    //     // setState(() {
+                                    //     isJoinedAlready = !isJoinedAlready!;
+                                    //     // });
+                                    //     showSnackBar(context, Colors.green,
+                                    //         "You Joined ${snapshot.data.docs[index]['groupName']}");
+                                    //   } else {
+                                    //     // setState(() {
+                                    //     isJoinedAlready = !isJoinedAlready!;
+                                    //     // });
+                                    //     showSnackBar(context, Colors.red,
+                                    //         "You Left ${snapshot.data.docs[index]['groupName']}");
+                                    //   }
+                                    // });
                                   },
                                   child: isJoinedAlready!
                                       ? const Text("Joined")

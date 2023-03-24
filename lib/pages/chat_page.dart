@@ -1,65 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertest/group/controller/group_controller.dart';
+import 'package:fluttertest/models/chat_model.dart';
+import 'package:fluttertest/models/user_model.dart';
 import 'package:fluttertest/pages/group_info.dart';
 import 'package:fluttertest/repository/database_service.dart';
 
+import '../controller/auth_controller.dart';
 import '../widgets/message_tile.dart';
 
 class ChatPage extends ConsumerStatefulWidget {
   static const routeName = '/chat-screen';
 
-  final String username;
   final String groupId;
   final String groupName;
-  final String fullName;
-  const ChatPage(
-      {Key? key,
-      required this.groupId,
-      required this.groupName,
-      required this.fullName,
-      required this.username})
-      : super(key: key);
+  const ChatPage({
+    Key? key,
+    required this.groupId,
+    required this.groupName,
+  }) : super(key: key);
 
   @override
   ConsumerState<ChatPage> createState() => _ChatPageState();
 }
 
 class _ChatPageState extends ConsumerState<ChatPage> {
-  Stream? chats;
+  UserModel? user;
   TextEditingController messageController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // initMessages();
+    ref.read(userDataProvider).whenData((value) => user = value);
   }
-
-  // initMessages() {
-  //   DatabaseService().getMessages(widget.groupId).then((val) {
-  //     setState(() {
-  //       chats = val;
-  //     });
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context).size;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.groupName),
         actions: [
           GestureDetector(
-            onTap: () => Navigator.pushNamed(context, GroupInfo.routeName),
-            // nextScreen(
-            //     context,
-            //     GroupInfo(
-            //         groupId: widget.groupId,
-            //         groupName: widget.groupName,
-            //         fullName: widget.fullName,
-            //         username: widget.username));
-
+            onTap: () =>
+                Navigator.pushNamed(context, GroupInfo.routeName, arguments: {
+              "groupId": widget.groupId,
+              "groupName": widget.groupName,
+            }),
             child: const Padding(
               padding: EdgeInsets.all(10.0),
               child: Icon(Icons.info),
@@ -107,38 +93,34 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   sendMessage() {
     if (messageController.text.isNotEmpty) {
-      // print(widget.username);
       Map<String, dynamic> message = {
         "message": messageController.text,
-        "sender": widget.username,
+        "sender": user?.username,
         "time": DateTime.now().millisecondsSinceEpoch,
       };
 
-      DatabaseService().sendMessage(widget.groupId, message);
-      setState(() {
-        messageController.clear();
-      });
+      ref.read(groupControllerProvider).sendMessage(widget.groupId, message);
+      messageController.clear();
     }
   }
 
   Widget messages() {
-    return StreamBuilder(
-      stream: chats,
-      builder: (context, AsyncSnapshot snapshot) {
-        return snapshot.hasData
-            ? ListView.builder(
-                shrinkWrap: true,
-                itemCount: snapshot.data.docs.length,
-                itemBuilder: (context, index) {
-                  // return Text(snapshot.data.docs[index]['message'].toString());
-                  return MessageTile(
-                      message: snapshot.data.docs[index]['message'],
-                      sender: snapshot.data.docs[index]['sender'],
-                      sentByMe: widget.username ==
-                          snapshot.data.docs[index]['sender']);
-                },
-              )
-            : Container();
+    return StreamBuilder<List<ChatModel>>(
+      stream: ref.watch(groupControllerProvider).getMessages(widget.groupId),
+      builder: (context, AsyncSnapshot<List<ChatModel>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container();
+        }
+        return ListView.builder(
+          shrinkWrap: true,
+          itemCount: snapshot.data?.length,
+          itemBuilder: (context, index) {
+            return MessageTile(
+                message: snapshot.data![index].message,
+                sender: snapshot.data![index].sender,
+                sentByMe: user?.username == snapshot.data![index].sender);
+          },
+        );
       },
     );
   }
