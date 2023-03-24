@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertest/controller/auth_controller.dart';
@@ -104,7 +103,6 @@ class _GroupInfoState extends ConsumerState<GroupInfo> {
                         .watch(groupControllerProvider)
                         .getUserDataFromId(snapshot.data!.members[index]),
                     builder: (context, AsyncSnapshot<UserModel> nameSnapshot) {
-                      print(nameSnapshot.data?.fullName);
                       if (nameSnapshot.data.toString() != "null") {
                         return Container(
                           padding: const EdgeInsets.symmetric(

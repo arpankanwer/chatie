@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertest/auth/login_screen.dart';
 import 'package:fluttertest/controller/auth_controller.dart';
 import 'package:fluttertest/pages/home_page.dart';
 

@@ -59,7 +59,7 @@ class GroupRepository {
     });
   }
 
-  Stream getGroupsByName(String groupName) {
+  Stream<List<GroupModel>> getGroupsByName(String groupName) {
     return firebaseFirestore
         .collection('groups')
         .where("groupName", isGreaterThanOrEqualTo: groupName)
@@ -67,7 +67,15 @@ class GroupRepository {
             isLessThan: groupName.substring(0, groupName.length - 1) +
                 String.fromCharCode(
                     groupName.codeUnitAt(groupName.length - 1) + 1))
-        .snapshots();
+        .snapshots()
+        .map((event) {
+      List<GroupModel> groups = [];
+      for (var i = 0; i < event.docs.length; i++) {
+        GroupModel group = GroupModel.fromMap(event.docs[i].data());
+        groups.add(group);
+      }
+      return groups;
+    });
   }
 
   Stream<UserModel> getGroups() {

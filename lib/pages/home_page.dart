@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertest/group/controller/group_controller.dart';
-import 'package:fluttertest/group/repository.dart/group_repository.dart';
 import 'package:fluttertest/models/group_model.dart';
 
 import '../commom/loader.dart';

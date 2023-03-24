@@ -27,7 +27,7 @@ class GroupController {
     return groupRepository.getGroupsName(groupId);
   }
 
-  Stream getGroupsByName(String groupId) {
+  Stream<List<GroupModel>> getGroupsByName(String groupId) {
     return groupRepository.getGroupsByName(groupId);
   }
 
@@ -37,6 +37,10 @@ class GroupController {
 
   Stream<List<ChatModel>> getMessages(String groupId) {
     return groupRepository.getMessages(groupId);
+  }
+
+  Future<String> getNameFromUid(String uid) {
+    return groupRepository.getNameFromUid(uid);
   }
 
   Future toggleJoinGroup(String groupId) {
