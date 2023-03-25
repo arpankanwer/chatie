@@ -34,7 +34,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Welcome, ${user!.username}"),
+        title: Text("Welcome, ${user?.username}"),
         centerTitle: true,
         actions: [
           Padding(
@@ -59,7 +59,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               ),
               const SizedBox(height: 15),
               Text(
-                "@${user!.username}",
+                "@${user?.username}",
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 2),

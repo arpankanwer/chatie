@@ -15,6 +15,7 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
+  bool isObsecure = true;
   final formKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -35,10 +36,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      body: SizedBox(
-        height: mediaQuery.height,
-        child: SingleChildScrollView(
-            child: Padding(
+      body: SingleChildScrollView(
+        child: Padding(
           padding: EdgeInsets.symmetric(
               horizontal: mediaQuery.width * 0.1,
               vertical: mediaQuery.height * 0.1),
@@ -49,20 +48,37 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text("Chat App", style: TextStyle(fontSize: 40)),
-                  SizedBox(height: mediaQuery.height * 0.02),
-                  const Text("Login", style: TextStyle(fontSize: 20)),
-                  SizedBox(height: mediaQuery.height * 0.02),
+                  ShaderMask(
+                    blendMode: BlendMode.srcIn,
+                    shaderCallback: (bounds) {
+                      return const LinearGradient(
+                        colors: [Colors.purple, Colors.blue],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ).createShader(bounds);
+                    },
+                    child: const Text(
+                      'Chatie',
+                      style: TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: mediaQuery.height * 0.03),
                   TextFormField(
                     keyboardType: TextInputType.emailAddress,
                     controller: emailController,
                     focusNode: emailFocusNode,
                     textInputAction: TextInputAction.next,
                     autofillHints: const [AutofillHints.email],
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Enter Email',
-                      label: Text("Email"),
+                    decoration: InputDecoration(
+                      hintText: 'Enter your email',
+                      labelText: 'Email',
+                      prefixIcon: const Icon(Icons.email),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: mediaQuery.height * 0.02,
+                          horizontal: mediaQuery.width * 0.01),
                     ),
                     onFieldSubmitted: (value) {
                       FocusScope.of(context).requestFocus(passwordFocusNode);
@@ -82,12 +98,25 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     focusNode: passwordFocusNode,
                     textInputAction: TextInputAction.done,
                     autofillHints: const [AutofillHints.password],
-                    obscureText: true,
+                    obscureText: isObsecure,
                     keyboardType: TextInputType.text,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
                       hintText: 'Enter Password',
-                      label: Text("Password"),
+                      label: const Text("Password"),
+                      prefixIcon: const Icon(Icons.lock),
+                      suffixIcon: IconButton(
+                        icon: isObsecure
+                            ? const Icon(Icons.visibility)
+                            : const Icon(Icons.visibility_off),
+                        onPressed: () {
+                          setState(() {
+                            isObsecure = !isObsecure;
+                          });
+                        },
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: mediaQuery.height * 0.02,
+                          horizontal: mediaQuery.width * 0.01),
                     ),
                     onFieldSubmitted: (value) {
                       TextInput.finishAutofillContext();
@@ -111,27 +140,59 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       const Flexible(
                         child: Text(
                           "Don't have an account yet ?",
-                          style: TextStyle(fontSize: 16),
+                          style: TextStyle(fontSize: 18),
                         ),
                       ),
                       SizedBox(width: mediaQuery.width * 0.01),
                       GestureDetector(
                         onTap: () => Navigator.pushReplacementNamed(
                             context, RegisterPage.routeName),
-                        child: const Text(
-                          "Register",
-                          style: TextStyle(color: Colors.blue, fontSize: 18),
+                        child: Text(
+                          'Register',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            foreground: Paint()
+                              ..shader = const LinearGradient(
+                                colors: [
+                                  Colors.blue,
+                                  Colors.purpleAccent,
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                stops: [0.0, 1.0],
+                              ).createShader(
+                                  const Rect.fromLTRB(0, 0, 200, 70)),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: mediaQuery.height * 0.02),
-                  ElevatedButton(onPressed: login, child: const Text("Login")),
+                  SizedBox(height: mediaQuery.height * 0.03),
+                  ElevatedButton(
+                    onPressed: login,
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                          vertical: mediaQuery.height * 0.02,
+                          horizontal: mediaQuery.width * 0.15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    child: const Text(
+                      'Login',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
-        )),
+        ),
       ),
     );
   }

@@ -8,6 +8,7 @@ import 'package:fluttertest/controller/auth_controller.dart';
 import 'package:fluttertest/pages/home_page.dart';
 import 'package:fluttertest/shared/constants.dart';
 import 'package:fluttertest/widgets/router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'auth/login_screen.dart';
 import 'commom/error.dart';
@@ -41,7 +42,36 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       title: "Chat App",
-      theme: ThemeData(brightness: Brightness.light),
+      theme: ThemeData(
+          brightness: Brightness.light,
+          primaryColor: Colors.green[500],
+          textTheme: GoogleFonts.openSansTextTheme(
+            Theme.of(context).textTheme,
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none,
+            ),
+            filled: true,
+            fillColor: Colors.grey.shade200,
+            enabledBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.transparent),
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.blue),
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.redAccent),
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.red, width: 2),
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+          )),
       debugShowCheckedModeBanner: false,
       onGenerateRoute: (settings) => generateRoute(settings),
       home: ref.watch(userDataProvider).when(
