@@ -81,7 +81,7 @@ class GroupRepository {
   Stream<UserModel> getGroups() {
     return firebaseFirestore
         .collection('users')
-        .doc(firebaseAuth.currentUser!.uid)
+        .doc(firebaseAuth.currentUser?.uid)
         .snapshots()
         .map((event) {
       UserModel user = UserModel.fromMap(event.data()!);

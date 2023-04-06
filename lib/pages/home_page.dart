@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertest/group/controller/group_controller.dart';
@@ -27,14 +28,20 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
-    ref.read(userDataProvider).whenData((value) => user = value);
+    ref.read(authControllerProvider).getUserData().then((value) {
+      setState(() {
+        user = value;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context).size;
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text("Welcome, ${user?.username}"),
+        title: Text("Welcome, ${user?.username}", overflow: TextOverflow.fade),
         centerTitle: true,
         actions: [
           Padding(
@@ -64,7 +71,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               ),
               const SizedBox(height: 2),
               Text(
-                user!.email,
+                user?.email ?? "",
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 15),
@@ -95,7 +102,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       body: groupList(),
       floatingActionButton: FloatingActionButton(
           onPressed: () {
-            addGroup(context);
+            addGroup(context, mediaQuery);
           },
           child: const Icon(Icons.add)),
     );
@@ -108,29 +115,32 @@ class _HomePageState extends ConsumerState<HomePage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Loader();
           }
-          return snapshot.data!.groups.isNotEmpty
-              ? ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: snapshot.data!.groups.length,
-                  itemBuilder: (content, index) {
-                    int reverseIndex = snapshot.data!.groups.length - index - 1;
-                    return StreamBuilder<GroupModel>(
-                        stream: ref
-                            .watch(groupControllerProvider)
-                            .getGroupsName(snapshot.data!.groups[reverseIndex]),
-                        builder:
-                            (context, AsyncSnapshot<GroupModel> nameSnapshot) {
-                          if (nameSnapshot.data != null) {
-                            return GroupTile(
-                                groupId: snapshot.data!.groups[reverseIndex],
-                                groupName: nameSnapshot.data!.groupName,
-                                username: snapshot.data!.username,
-                                fullName: snapshot.data!.fullName);
-                          }
-                          return Container();
-                        });
-                  })
-              : noGroupList();
+          if (snapshot.data!.groups.isNotEmpty) {
+            return ListView.builder(
+                // padding: const EdgeInsets.only(top: 10),
+                shrinkWrap: true,
+                itemCount: snapshot.data!.groups.length,
+                itemBuilder: (content, index) {
+                  int reverseIndex = snapshot.data!.groups.length - index - 1;
+                  return StreamBuilder<GroupModel>(
+                      stream: ref
+                          .watch(groupControllerProvider)
+                          .getGroupsName(snapshot.data!.groups[reverseIndex]),
+                      builder:
+                          (context, AsyncSnapshot<GroupModel> nameSnapshot) {
+                        if (nameSnapshot.data != null) {
+                          return GroupTile(
+                              groupId: snapshot.data!.groups[reverseIndex],
+                              groupName: nameSnapshot.data!.groupName,
+                              username: snapshot.data!.username,
+                              fullName: snapshot.data!.fullName);
+                        }
+                        return Container();
+                      });
+                });
+          } else {
+            return noGroupList();
+          }
         });
   }
 
@@ -140,26 +150,55 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  addGroup(BuildContext context) {
+  addGroup(BuildContext context, mediaQuery) {
     showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text("Create Group"),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            title: const Text(
+              'Create new group',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
             content: SizedBox(
-              height: 100,
               child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextFormField(
                     onChanged: (value) {
                       groupName.text = value;
                     },
+                    onEditingComplete: () {
+                      if (groupName.text != "") {
+                        ref
+                            .read(groupControllerProvider)
+                            .createGroup(context, groupName.text);
+                        groupName.clear();
+                      }
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Create Group',
+                      label: const Text("Create Group"),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: mediaQuery.height * 0.02,
+                          horizontal: mediaQuery.width * 0.02),
+                    ),
                   )
                 ],
               ),
             ),
             actions: [
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -171,8 +210,14 @@ class _HomePageState extends ConsumerState<HomePage> {
                     ref
                         .read(groupControllerProvider)
                         .createGroup(context, groupName.text);
+                    groupName.clear();
                   }
                 },
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
                 child: const Text("Create"),
               )
             ],

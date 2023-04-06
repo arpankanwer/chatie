@@ -1,14 +1,15 @@
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertest/controller/auth_controller.dart';
-import 'package:fluttertest/pages/home_page.dart';
-import 'package:fluttertest/shared/constants.dart';
-import 'package:fluttertest/widgets/router.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import 'controller/auth_controller.dart';
+import 'pages/home_page.dart';
+import 'shared/constants.dart';
+import 'widgets/router.dart';
 
 import 'auth/login_screen.dart';
 import 'commom/error.dart';
@@ -41,7 +42,7 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
-      title: "Chat App",
+      title: "Chatie",
       theme: ThemeData(
           brightness: Brightness.light,
           primaryColor: Colors.green[500],
@@ -76,9 +77,9 @@ class MyApp extends ConsumerWidget {
       onGenerateRoute: (settings) => generateRoute(settings),
       home: ref.watch(userDataProvider).when(
             data: (user) {
-              if (user == null) {
-                return const LoginPage();
-              }
+
+              if (user == null) return const LoginPage();
+
               return const HomePage();
             },
             error: (err, trace) {

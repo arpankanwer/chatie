@@ -30,11 +30,16 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   @override
   void initState() {
     super.initState();
-    ref.read(userDataProvider).whenData((value) => user = value);
+    ref.read(authControllerProvider).getUserData().then((value) {
+      setState(() {
+        user = value;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.groupName),
@@ -60,30 +65,28 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           Container(
             color: Colors.grey[700],
             padding: const EdgeInsets.all(10.0),
-            child: Row(
-              children: [
-                Flexible(
-                    child: TextFormField(
-                  controller: messageController,
-                  keyboardType: TextInputType.text,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Enter Message',
-                    label: Text("Message"),
-                  ),
-                  onFieldSubmitted: (value) {
-                    setState(() {
-                      messageController.text = value;
-                    });
-                  },
-                )),
-                ElevatedButton(
-                    onPressed: () {
-                      sendMessage();
-                    },
-                    child: const Icon(Icons.send))
-              ],
-            ),
+            child: Flexible(
+                child: TextFormField(
+              controller: messageController,
+              keyboardType: TextInputType.text,
+              decoration: InputDecoration(
+                hintText: 'Enter Message',
+                label: const Text("Message"),
+                prefixIcon: const Icon(Icons.emoji_emotions_rounded),
+                suffixIcon: IconButton(
+                    onPressed: sendMessage, icon: const Icon(Icons.send)),
+                contentPadding: EdgeInsets.symmetric(
+                    vertical: mediaQuery.height * 0.02,
+                    horizontal: mediaQuery.width * 0.01),
+              ),
+              onFieldSubmitted: (value) {
+                messageController.text = value;
+                sendMessage();
+              },
+              onEditingComplete: () {
+                
+              },
+            )),
           )
         ],
       ),
@@ -110,15 +113,18 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Container();
         }
-        return ListView.builder(
-          shrinkWrap: true,
-          itemCount: snapshot.data?.length,
-          itemBuilder: (context, index) {
-            return MessageTile(
-                message: snapshot.data![index].message,
-                sender: snapshot.data![index].sender,
-                sentByMe: user?.username == snapshot.data![index].sender);
-          },
+        return Expanded(
+          child: ListView.builder(
+            reverse: true,
+            shrinkWrap: true,
+            itemCount: snapshot.data?.length,
+            itemBuilder: (context, index) {
+              return MessageTile(
+                  message: snapshot.data![index].message,
+                  sender: snapshot.data![index].sender,
+                  sentByMe: user?.username == snapshot.data![index].sender);
+            },
+          ),
         );
       },
     );

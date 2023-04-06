@@ -23,12 +23,15 @@ class GroupInfo extends ConsumerStatefulWidget {
 
 class _GroupInfoState extends ConsumerState<GroupInfo> {
   UserModel? user;
-
+  
   @override
   void initState() {
     super.initState();
-
-    ref.read(userDataProvider).whenData((value) => user = value);
+    ref.read(authControllerProvider).getUserData().then((value) {
+      setState(() {
+        user = value;
+      });
+    });
   }
 
   @override
