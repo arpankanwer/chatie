@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertest/controller/auth_controller.dart';
-import 'package:fluttertest/pages/home_page.dart';
+import 'package:chatie/controller/auth_controller.dart';
+import 'package:chatie/pages/home_page.dart';
 
 class ProfilePage extends ConsumerWidget {
   static const routeName = '/profile-screen';

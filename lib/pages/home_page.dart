@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertest/group/controller/group_controller.dart';
-import 'package:fluttertest/models/group_model.dart';
+import 'package:chatie/group/controller/group_controller.dart';
+import 'package:chatie/models/group_model.dart';
 
 import '../commom/loader.dart';
 import '/controller/auth_controller.dart';

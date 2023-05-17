@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertest/auth/login_screen.dart';
-import 'package:fluttertest/auth/register_screen.dart';
-import 'package:fluttertest/pages/chat_page.dart';
-import 'package:fluttertest/pages/group_info.dart';
-import 'package:fluttertest/pages/home_page.dart';
-import 'package:fluttertest/pages/profile_page.dart';
-import 'package:fluttertest/pages/search_page.dart';
+import 'package:chatie/auth/login_screen.dart';
+import 'package:chatie/auth/register_screen.dart';
+import 'package:chatie/pages/chat_page.dart';
+import 'package:chatie/pages/group_info.dart';
+import 'package:chatie/pages/home_page.dart';
+import 'package:chatie/pages/profile_page.dart';
+import 'package:chatie/pages/search_page.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {

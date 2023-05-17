@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertest/auth/login_screen.dart';
-import 'package:fluttertest/models/user_model.dart';
-import 'package:fluttertest/pages/home_page.dart';
+import 'package:chatie/auth/login_screen.dart';
+import 'package:chatie/models/user_model.dart';
+import 'package:chatie/pages/home_page.dart';
 
 import '../widgets/widgets.dart';
 

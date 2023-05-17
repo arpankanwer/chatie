@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertest/repository/auth_repository.dart';
+import 'package:chatie/repository/auth_repository.dart';
 
 import '../models/user_model.dart';
 

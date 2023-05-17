@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertest/group/controller/group_controller.dart';
-import 'package:fluttertest/models/chat_model.dart';
-import 'package:fluttertest/models/user_model.dart';
-import 'package:fluttertest/pages/group_info.dart';
+import 'package:chatie/group/controller/group_controller.dart';
+import 'package:chatie/models/chat_model.dart';
+import 'package:chatie/models/user_model.dart';
+import 'package:chatie/pages/group_info.dart';
 
 import '../controller/auth_controller.dart';
 import '../widgets/message_tile.dart';
