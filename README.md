@@ -4,6 +4,12 @@
 
 A real-time group chat application that allows users to send messages using Firebase Storage. Users can create groups, join existing groups by searching for their names, and administrators can manage group members. The application provides a seamless chatting experience similar to popular messaging platforms like Telegram.
 
+
+## Usage
+
+To use the application, you can visit the following link: [https://chatie.arpankanwer.me/](https://chatie.arpankanwer.me/)
+
+
 ## Features
 
 - User authentication: Users can create accounts and log in to access the application.
@@ -23,7 +29,7 @@ A real-time group chat application that allows users to send messages using Fire
 
 ## Installation
 
-1. Clone the repository: `git clone https://github.com/your_username/group-chat-app.git`
+1. Clone the repository: `git clone https://github.com/arpankanwer/chatie.git`
 2. Navigate to the project directory: `cd group-chat-app`
 3. Install the dependencies: `flutter pub get`
 4. Set up Firebase project: Create a new Firebase project and set up authentication, Firestore, and Storage services.
@@ -46,4 +52,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Contact
 
-For any inquiries or feedback, please contact [Arpan Kanwer](mailto:arpan@example.com).
+For any inquiries or feedback, please contact [Arpan Kanwer](mailto:arpankanwer98@gmail.com).
