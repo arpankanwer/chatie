@@ -83,9 +83,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 messageController.text = value;
                 sendMessage();
               },
-              onEditingComplete: () {
-                
-              },
+              onEditingComplete: () {},
             )),
           )
         ],

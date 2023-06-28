@@ -55,9 +55,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     decoration: const InputDecoration(
                       hintText: "Search Groups",
                       border: InputBorder.none,
-                      hintStyle: TextStyle(color: Colors.white),
+                      hintStyle: TextStyle(color: Colors.black),
                     ),
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.black),
                   ),
                 ),
                 const Icon(

@@ -45,7 +45,7 @@ class MyApp extends ConsumerWidget {
       title: "Chatie",
       theme: ThemeData(
           brightness: Brightness.light,
-          primaryColor: Colors.green[500],
+          // primaryColor: Colors.green[500],
           textTheme: GoogleFonts.openSansTextTheme(
             Theme.of(context).textTheme,
           ),
@@ -77,7 +77,6 @@ class MyApp extends ConsumerWidget {
       onGenerateRoute: (settings) => generateRoute(settings),
       home: ref.watch(userDataProvider).when(
             data: (user) {
-
               if (user == null) return const LoginPage();
 
               return const HomePage();
