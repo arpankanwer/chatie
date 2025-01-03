@@ -1,4 +1,4 @@
-# Group Chat Application
+# Chatie: Group Chat Application
 
 ![Chatie](github_images/home.png)
 
