@@ -1,7 +1,6 @@
 # Group Chat Application
 
 ![Chatie](github_images/home.png)
-![Chatie](github_images/login.png)
 
 A real-time group chat application that allows users to send messages using Firebase Storage. Users can create groups, join existing groups by searching for their names, and administrators can manage group members. The application provides a seamless chatting experience similar to popular messaging platforms like Telegram.
 
