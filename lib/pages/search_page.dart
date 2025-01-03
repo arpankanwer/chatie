@@ -127,11 +127,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                   style: isJoinedAlready!
                                       ? ButtonStyle(
                                           backgroundColor:
-                                              MaterialStateProperty.all(
+                                              WidgetStateProperty.all(
                                                   Colors.green))
                                       : ButtonStyle(
                                           backgroundColor:
-                                              MaterialStateProperty.all(
+                                              WidgetStateProperty.all(
                                                   Theme.of(context)
                                                       .primaryColor)),
                                   onPressed: () async {
