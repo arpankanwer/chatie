@@ -12,10 +12,10 @@ class GroupInfo extends ConsumerStatefulWidget {
   final String groupId;
   final String groupName;
   const GroupInfo({
-    Key? key,
+    super.key,
     required this.groupId,
     required this.groupName,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<GroupInfo> createState() => _GroupInfoState();

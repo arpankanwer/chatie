@@ -9,12 +9,11 @@ class GroupTile extends ConsumerStatefulWidget {
   final String groupName;
   final String fullName;
   const GroupTile(
-      {Key? key,
+      {super.key,
       required this.groupId,
       required this.groupName,
       required this.fullName,
-      required this.username})
-      : super(key: key);
+      required this.username});
 
   @override
   ConsumerState<GroupTile> createState() => _GroupTileState();
