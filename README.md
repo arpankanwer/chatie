@@ -34,8 +34,8 @@ This project is licensed under the [MIT License](LICENSE).
 I'm always interested in new opportunities and collaborations. Feel free to reach out to me through the following channels:
 
 - **Email:** [kanwer@sheridancollege.ca](mailto:kanwer@sheridancollege.ca)
-- **LinkedIn:** [Arpan Kanwer](https://www.linkedin.com/in/arpankanwer)
-- **Github:** [Arpan Kanwer](https://github.com/arpankanwer/)
-- **Personal Website:** [Arpan Kanwer](https://arpankanwer.tech/)
+- **LinkedIn:** [Birarpanjot Singh](https://www.linkedin.com/in/arpankanwer)
+- **Github:** [Birarpanjot Singh](https://github.com/arpankanwer/)
+- **Personal Website:** [Birarpanjot Singh](https://arpankanwer.tech/)
 
 Let's connect and create something amazing together!
